@@ -2,6 +2,9 @@
 
 Classic Flappy Bird game optimized for the CloudFone platform with support for 240x320 (QVGA) and 128x160 (QQVGA) screen resolutions.
 
+## 🎮 Play Online
+**[Play Flappy Bird CloudFone](https://phucph0501.github.io/Flappy-Bird-CloudFone/)**
+
 ## Features
 
 - **Classic Flappy Bird Gameplay**: Navigate the bird through pipes by tapping or pressing keys
