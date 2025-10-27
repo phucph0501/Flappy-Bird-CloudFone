@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flappy Bird - CloudFone</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+    <div class="container">
+        <!-- Game Canvas -->
+        <canvas id="gameCanvas" width="240" height="320"></canvas>
+        
+        <!-- Game UI Overlay -->
+        <div class="game-ui" id="gameUI">
+            <!-- Start Screen -->
+            <div class="screen" id="startScreen">
+                <div class="title">
+                    <h1>Flappy Bird</h1>
+                    <p>CloudFone Edition</p>
+                </div>
+                <div class="start-message">
+                    <p>Press SPACE or tap to start</p>
+                    <p>Use SPACE/UP arrow to flap</p>
+                </div>
+            </div>
+            
+            <!-- Game Over Screen -->
+            <div class="screen hidden" id="gameOverScreen">
+                <div class="game-over-title">
+                    <h2>Game Over</h2>
+                </div>
+                <div class="score-display">
+                    <div class="score-item">
+                        <span class="label">Score</span>
+                        <span class="value" id="finalScore">0</span>
+                    </div>
+                    <div class="score-item">
+                        <span class="label">Best</span>
+                        <span class="value" id="bestScore">0</span>
+                    </div>
+                </div>
+                <div class="restart-message">
+                    <p>Press SPACE to restart</p>
+                </div>
+            </div>
+            
+            <!-- In-Game HUD -->
+            <div class="hud hidden" id="gameHUD">
+                <div class="current-score" id="currentScore">0</div>
+            </div>
+        </div>
+        
+        <!-- CloudFone Soft Key Bar -->
+        <div class="soft-key-bar">
+            <div class="soft-key left" id="soft-key-left">Flap</div>
+            <div class="soft-key-spacer"></div>
+            <div class="soft-key right" id="soft-key-right">Exit</div>
+        </div>
+        
+        <!-- Instructions -->
+        <div class="instructions">
+            <p><strong>Controls:</strong> SPACE/UP arrow to flap, Left menu to flap, Right menu to exit</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
