@@ -118,13 +118,21 @@ class FlappyBirdGame {
         });
         
         // Soft key controls
-        document.getElementById('jumpBtn').addEventListener('click', () => {
-            this.handleJump();
-        });
-        
-        document.getElementById('exitBtn').addEventListener('click', () => {
-            this.handleExit();
-        });
+        // Soft key controls (CloudFone soft key bar)
+        const leftSoft = document.getElementById('soft-key-left') || document.getElementById('jumpBtn');
+        const rightSoft = document.getElementById('soft-key-right') || document.getElementById('exitBtn');
+        if (leftSoft) {
+            leftSoft.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleJump();
+            });
+        }
+        if (rightSoft) {
+            rightSoft.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleExit();
+            });
+        }
         
         // Window resize
         window.addEventListener('resize', () => {
@@ -292,97 +300,186 @@ class FlappyBirdGame {
         // Clear canvas
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         
-        // Draw sky gradient
-        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.canvas.height);
-        gradient.addColorStop(0, '#70c5ce');
-        gradient.addColorStop(0.5, '#bde3e8');
-        gradient.addColorStop(0.5, '#ded895');
-        gradient.addColorStop(1, '#87ceeb');
-        this.ctx.fillStyle = gradient;
-        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        // Draw background - Flappy Bird style
+        this.drawBackground();
         
         // Draw pipes
-        this.ctx.fillStyle = '#228B22';
+        this.drawPipes();
+        
+        // Draw ground with city skyline
+        this.drawGround();
+        
+        // Draw bird
+        this.drawBird();
+        
+        // Draw clouds
+        this.drawClouds();
+    }
+    
+    drawBackground() {
+        // Sky gradient - cyan to light blue
+        const gradient = this.ctx.createLinearGradient(0, 0, 0, this.groundY);
+        gradient.addColorStop(0, '#4ec0ca');
+        gradient.addColorStop(1, '#87ceeb');
+        this.ctx.fillStyle = gradient;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.groundY);
+    }
+    
+    drawPipes() {
         for (const pipe of this.pipes) {
+            // Draw pipe body with gradient
+            const pipeGradient = this.ctx.createLinearGradient(pipe.x, 0, pipe.x + this.pipeWidth, 0);
+            pipeGradient.addColorStop(0, '#228B22');
+            pipeGradient.addColorStop(0.3, '#32CD32');
+            pipeGradient.addColorStop(0.7, '#228B22');
+            pipeGradient.addColorStop(1, '#006400');
+            
+            this.ctx.fillStyle = pipeGradient;
+            
             // Top pipe
             this.ctx.fillRect(pipe.x, 0, this.pipeWidth, pipe.topHeight);
             // Bottom pipe
             this.ctx.fillRect(pipe.x, pipe.bottomY, this.pipeWidth, pipe.bottomHeight);
             
-            // Pipe caps
+            // Pipe caps with rounded edges
             this.ctx.fillStyle = '#32CD32';
-            this.ctx.fillRect(pipe.x - 3, pipe.topHeight - 15, this.pipeWidth + 6, 15);
-            this.ctx.fillRect(pipe.x - 3, pipe.bottomY, this.pipeWidth + 6, 15);
-            this.ctx.fillStyle = '#228B22';
+            const capHeight = 20;
+            const capWidth = this.pipeWidth + 6;
+            const capX = pipe.x - 3;
+            
+            // Top cap
+            this.drawRoundedRect(capX, pipe.topHeight - capHeight, capWidth, capHeight, 3);
+            // Bottom cap
+            this.drawRoundedRect(capX, pipe.bottomY, capWidth, capHeight, 3);
+            
+            // Add pipe shine effect
+            this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            this.ctx.fillRect(pipe.x + 2, 0, 3, pipe.topHeight);
+            this.ctx.fillRect(pipe.x + 2, pipe.bottomY, 3, pipe.bottomHeight);
         }
-        
-        // Draw ground
-        this.ctx.fillStyle = '#DEB887';
+    }
+    
+    drawGround() {
+        // Ground base
+        this.ctx.fillStyle = '#ded895';
         this.ctx.fillRect(0, this.groundY, this.canvas.width, this.groundHeight);
         
-        // Draw grass on ground
-        this.ctx.fillStyle = '#9ACD32';
+        // Grass layer
+        this.ctx.fillStyle = '#5ac54f';
         this.ctx.fillRect(0, this.groundY, this.canvas.width, 8);
         
-        // Draw bird
-        if (this.bird.alive) {
-            this.ctx.fillStyle = this.bird.color;
-        } else {
-            this.ctx.fillStyle = '#FF4444';
-        }
+        // Simple city skyline
+        this.drawCitySkyline();
+    }
+    
+    drawCitySkyline() {
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        const buildingWidth = 15;
+        const numBuildings = Math.ceil(this.canvas.width / buildingWidth);
         
-        // Bird body
+        for (let i = 0; i < numBuildings; i++) {
+            const x = i * buildingWidth;
+            const height = 20 + Math.random() * 15;
+            this.ctx.fillRect(x, this.groundY - height, buildingWidth - 1, height);
+            
+            // Building windows
+            this.ctx.fillStyle = 'rgba(255, 255, 0, 0.8)';
+            for (let j = 0; j < 2; j++) {
+                for (let k = 0; k < Math.floor(height / 8); k++) {
+                    if (Math.random() > 0.5) {
+                        this.ctx.fillRect(x + 2 + j * 6, this.groundY - height + 2 + k * 8, 3, 3);
+                    }
+                }
+            }
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        }
+    }
+    
+    drawBird() {
+        const birdX = this.bird.x;
+        const birdY = this.bird.y;
+        const size = this.bird.width;
+        
+        // Bird rotation based on velocity
+        const rotation = Math.max(-0.5, Math.min(0.5, this.bird.velocity * 0.1));
+        
+        this.ctx.save();
+        this.ctx.translate(birdX + size/2, birdY + size/2);
+        this.ctx.rotate(rotation);
+        
+        // Bird body - yellow with orange tint
+        const bodyGradient = this.ctx.createRadialGradient(0, 0, 0, 0, 0, size/2);
+        bodyGradient.addColorStop(0, '#ffdc00');
+        bodyGradient.addColorStop(1, '#ffa500');
+        this.ctx.fillStyle = bodyGradient;
+        
         this.ctx.beginPath();
-        this.ctx.ellipse(
-            this.bird.x + this.bird.width/2, 
-            this.bird.y + this.bird.height/2, 
-            this.bird.width/2, 
-            this.bird.height/2, 
-            0, 0, 2 * Math.PI
-        );
+        this.ctx.ellipse(0, 0, size*0.5, size*0.4, 0, 0, 2 * Math.PI);
         this.ctx.fill();
         
-        // Bird wing (simple animation)
-        if (this.frameCount % 10 < 5) {
-            this.ctx.fillStyle = '#FFD700';
-            this.ctx.beginPath();
-            this.ctx.ellipse(
-                this.bird.x + this.bird.width * 0.3, 
-                this.bird.y + this.bird.height * 0.4, 
-                this.bird.width * 0.3, 
-                this.bird.height * 0.2, 
-                0, 0, 2 * Math.PI
-            );
-            this.ctx.fill();
-        }
+        // Wing animation
+        const wingFlap = Math.sin(this.frameCount * 0.3) * 0.3;
+        this.ctx.fillStyle = '#ff8c00';
+        this.ctx.beginPath();
+        this.ctx.ellipse(-size*0.2, wingFlap - size*0.1, size*0.3, size*0.2, 0, 0, 2 * Math.PI);
+        this.ctx.fill();
         
         // Bird eye
-        this.ctx.fillStyle = '#FFFFFF';
+        this.ctx.fillStyle = '#ffffff';
         this.ctx.beginPath();
-        this.ctx.arc(
-            this.bird.x + this.bird.width * 0.6, 
-            this.bird.y + this.bird.height * 0.3, 
-            this.bird.width * 0.15, 
-            0, 2 * Math.PI
-        );
+        this.ctx.arc(size*0.15, -size*0.15, size*0.15, 0, 2 * Math.PI);
         this.ctx.fill();
         
         this.ctx.fillStyle = '#000000';
         this.ctx.beginPath();
-        this.ctx.arc(
-            this.bird.x + this.bird.width * 0.65, 
-            this.bird.y + this.bird.height * 0.3, 
-            this.bird.width * 0.08, 
-            0, 2 * Math.PI
-        );
+        this.ctx.arc(size*0.2, -size*0.1, size*0.08, 0, 2 * Math.PI);
         this.ctx.fill();
         
-        // Bird beak
-        this.ctx.fillStyle = '#FFA500';
+        // Beak
+        this.ctx.fillStyle = '#ff6600';
         this.ctx.beginPath();
-        this.ctx.moveTo(this.bird.x + this.bird.width, this.bird.y + this.bird.height * 0.5);
-        this.ctx.lineTo(this.bird.x + this.bird.width + 8, this.bird.y + this.bird.height * 0.4);
-        this.ctx.lineTo(this.bird.x + this.bird.width + 8, this.bird.y + this.bird.height * 0.6);
+        this.ctx.moveTo(size*0.4, 0);
+        this.ctx.lineTo(size*0.7, -size*0.1);
+        this.ctx.lineTo(size*0.7, size*0.1);
+        this.ctx.closePath();
+        this.ctx.fill();
+        
+        this.ctx.restore();
+    }
+    
+    drawClouds() {
+        // Simple cloud effect
+        this.ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        const cloudOffset = (this.frameCount * 0.5) % (this.canvas.width + 60);
+        
+        for (let i = 0; i < 3; i++) {
+            const x = -60 + cloudOffset + i * 100;
+            const y = 30 + i * 20;
+            this.drawCloud(x, y, 30 + i * 5);
+        }
+    }
+    
+    drawCloud(x, y, size) {
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, size * 0.5, 0, 2 * Math.PI);
+        this.ctx.arc(x + size * 0.5, y, size * 0.7, 0, 2 * Math.PI);
+        this.ctx.arc(x + size, y, size * 0.5, 0, 2 * Math.PI);
+        this.ctx.arc(x + size * 0.25, y - size * 0.5, size * 0.6, 0, 2 * Math.PI);
+        this.ctx.arc(x + size * 0.75, y - size * 0.5, size * 0.6, 0, 2 * Math.PI);
+        this.ctx.fill();
+    }
+    
+    drawRoundedRect(x, y, width, height, radius) {
+        this.ctx.beginPath();
+        this.ctx.moveTo(x + radius, y);
+        this.ctx.lineTo(x + width - radius, y);
+        this.ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.ctx.lineTo(x + width, y + height - radius);
+        this.ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.ctx.lineTo(x + radius, y + height);
+        this.ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.ctx.lineTo(x, y + radius);
+        this.ctx.quadraticCurveTo(x, y, x + radius, y);
         this.ctx.closePath();
         this.ctx.fill();
     }
