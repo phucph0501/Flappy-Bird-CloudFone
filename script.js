@@ -93,28 +93,60 @@ class FlappyBirdGame {
     setupEventListeners() {
         // Keyboard controls - CloudFone optimized
         document.addEventListener('keydown', (e) => {
+            // Debug: Show key info
+            const debugDiv = document.getElementById('debugKeys');
+            if (debugDiv) {
+                debugDiv.innerHTML = `Key: "${e.key}" | Code: ${e.keyCode} | Which: ${e.which}`;
+            }
+            console.log('Key pressed:', e.key, 'KeyCode:', e.keyCode, 'Which:', e.which); // Debug log
+            
             switch(e.key) {
                 case ' ':
                 case 'ArrowUp':
                 case 'Enter':
                 case '5': // CloudFone center/select key
+                case 'Accept': // Some CloudFone devices use this
                     e.preventDefault();
                     this.handleJump();
                     break;
                 case 'Escape':
                 case 'Backspace': // CloudFone back key
+                case 'EndCall': // CloudFone end call key
                     this.handleExit();
                     break;
-                case 'SoftLeft': // CloudFone left soft key
-                case 'F1': // Alternative for left soft key
+            }
+            
+            // Handle by keyCode for CloudFone compatibility
+            switch(e.keyCode) {
+                case 13: // Enter
+                case 32: // Space
+                case 38: // Arrow Up
+                case 53: // Number 5
+                case 229: // CloudFone select/OK key
+                case 13: // CloudFone center key
                     e.preventDefault();
                     this.handleJump();
                     break;
-                case 'SoftRight': // CloudFone right soft key  
-                case 'F2': // Alternative for right soft key
+                case 27: // Escape
+                case 8: // Backspace
+                case 35: // End key (CloudFone)
                     e.preventDefault();
                     this.handleExit();
                     break;
+            }
+        });
+        
+        // Handle soft keys by keyCode (CloudFone specific)
+        document.addEventListener('keydown', (e) => {
+            // Left soft key (various CloudFone models)
+            if (e.keyCode === 112 || e.keyCode === 37 || e.key === 'SoftLeft') {
+                e.preventDefault();
+                this.handleJump();
+            }
+            // Right soft key (various CloudFone models)
+            if (e.keyCode === 113 || e.keyCode === 39 || e.key === 'SoftRight') {
+                e.preventDefault();
+                this.handleExit();
             }
         });
         
