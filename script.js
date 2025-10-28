@@ -91,16 +91,28 @@ class FlappyBirdGame {
     }
     
     setupEventListeners() {
-        // Keyboard controls
+        // Keyboard controls - CloudFone optimized
         document.addEventListener('keydown', (e) => {
             switch(e.key) {
                 case ' ':
                 case 'ArrowUp':
                 case 'Enter':
+                case '5': // CloudFone center/select key
                     e.preventDefault();
                     this.handleJump();
                     break;
                 case 'Escape':
+                case 'Backspace': // CloudFone back key
+                    this.handleExit();
+                    break;
+                case 'SoftLeft': // CloudFone left soft key
+                case 'F1': // Alternative for left soft key
+                    e.preventDefault();
+                    this.handleJump();
+                    break;
+                case 'SoftRight': // CloudFone right soft key  
+                case 'F2': // Alternative for right soft key
+                    e.preventDefault();
                     this.handleExit();
                     break;
             }
